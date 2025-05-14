@@ -1047,4 +1047,17 @@
             renderAllCommentsMarkdown(); // Initial rendering for all comments loaded with the page
 
         }); // Ensures the second DOMContentLoaded listener is properly closed with });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach voting event listeners for the thread (main thread, not comments)
+            document.querySelectorAll('.thread.listing .vote .upvote, .thread.listing .vote .downvote').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const itemId = this.dataset.voteItemId;
+                    const itemType = this.dataset.voteItemType;
+                    const voteType = this.dataset.voteType;
+                    vote(itemId, itemType, voteType);
+                });
+            });
+        });
     </script>
