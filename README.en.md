@@ -21,7 +21,7 @@ A modern forum web application inspired by Reddit, built with Node.js, Express, 
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/KoreanPizzaGuy/FEIT_Forum.git
-   cd reddit
+   cd FEIT_Forum
    ```
 2. **Install dependencies:**
    ```sh
