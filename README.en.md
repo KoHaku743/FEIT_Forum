@@ -29,42 +29,56 @@ A modern forum web application inspired by Reddit, built with Node.js, Express, 
    ```
 3. **Configure the database:**
    - Run the provided SQL schema to create tables (`users`, `threads`, `comments`, etc).
+
+## MySQL Database Setup
+
+1. Log in to MySQL:
+   ```sh
+   mysql -u root -p
+   ```
+2. Create the database and user (customize names and password as needed):
+   ```sql
+   CREATE DATABASE feit_forum CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'forum_user'@'localhost' IDENTIFIED BY 'strong_password';
+   GRANT ALL PRIVILEGES ON feit_forum.* TO 'forum_user'@'localhost';
+   FLUSH PRIVILEGES;
+   ```
+3. Import the database schema (see the included `schema.sql` file):
+   ```sh
+   mysql -u forum_user -p feit_forum < schema.sql
+   ```
+4. Copy `.env.example` to `.env` and fill in your DB credentials and session secret.
+
+You can now continue with the installation steps above.
+
 4. **Start the app:**
 
-   ````sh
-   # For admin dashboard (optional, if using separate admin port):   node app.js
-   node admin-app.jsatabase and user.
-   ```y `.env.example` to `.env` and fill in your DB credentials and session secret.
-   The main app runs at [http://localhost:3000](http://localhost:3000)rovided SQL schema to create tables (`users`, `threads`, `comments`, etc).
+   ```sh
+   # For admin dashboard (optional, if using separate admin port):
+   node app.js
+   node admin-app.js
+   ```
+
+   The main app runs at [http://localhost:3000](http://localhost:3000)
    The admin dashboard (if enabled) runs at [http://localhost:4000/admin](http://localhost:4000/admin)
-   ````
 
 ## Folder Structure
 
-- `routes/` - Express route handlers- `app.js` - Main Express app
-- `models/` - Database modelsAdmin dashboard app
-- `public/` - Static files (CSS, avatars, uploads) node app.js
-- `views/` - EJS templates (partials, admin, user, thread, etc)onal, if using separate admin port):
+- `routes/` - Express route handlers
+- `models/` - Database models
+- `public/` - Static files (CSS, avatars, uploads)
+- `views/` - EJS templates (partials, admin, user, thread, etc)
+- `app.js` - Main Express app
+- `admin-app.js` - Admin dashboard app
 
 ## Admin Features
 
-- Login as admin at `/admin/login` (default: admin/admin)//localhost:3000](http://localhost:3000)
-- Promote users to admin in the admin dashboard/localhost:4000/admin](http://localhost:4000/admin)
+- Login as admin at `/admin/login` (default: admin/admin)
+- Promote users to admin in the admin dashboard
 - Edit/delete any thread or comment
 - Manage users
-  re
 
 ## Tech Stack
-
-- Node.js, Express, EJS
-- MySQL
-- Bulma CSS, Font Awesomes
-- Marked.js (Markdown), KaTeX (math), emoji supportDatabase models
-- `public/` - Static files (CSS, avatars, uploads)
-
-## LicenseEJS templates (partials, admin, user, thread, etc)
-
-MIT
 
 - Node.js, Express, EJS
 - MySQL
