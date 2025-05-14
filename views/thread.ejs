@@ -1,0 +1,1050 @@
+<%- include('partials/header') %>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Added marked.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"
+        integrity="sha384-hIoBPJpTUs79PPHSQhpGI+N2ga2p8gX9LPMfKTRkRfNqMTCk9upR2zI0P77A/3TL"
+        crossorigin="anonymous"></script> <!-- Added KaTeX from CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css"
+        integrity="sha384-wcIxkf4k55AIcd2uy7g7zHVALUXflwPq2S2AGL1K2b9HhE9K+K8r0S+M2BHEJqL2" crossorigin="anonymous">
+    <!-- Added KaTeX CSS from CDN -->
+    <script>
+        // Initialize marked to use markedEmoji and KaTeX
+        // This setup assumes markedEmoji is available globally or via another script tag if not using a bundler
+        // For KaTeX, we'll look for $$...$$ and $...$ delimiters
+        if (typeof marked !== 'undefined') {
+            // Basic GFM (GitHub Flavored Markdown)
+            marked.setOptions({
+                gfm: true,
+                breaks: true, // Convert GFM newlines into <br> tags
+                sanitize: false, // IMPORTANT: Set to true if you don't trust the input. If true, HTML in markdown will be stripped.
+                // If you keep it false, ensure your server-side sanitizes input if needed.
+                renderer: new marked.Renderer()
+            });
+
+            // Simple KaTeX integration (run after marked, or integrate into renderer)
+            // This is a post-processing step. A more robust solution might extend the marked renderer.
+            const renderMathInElement = function (elem) {
+                if (typeof katex !== 'undefined' && elem) {
+                    const mathElements = elem.querySelectorAll('.math-inline, .math-display');
+                    mathElements.forEach(mathElem => {
+                        const texSource = mathElem.textContent;
+                        try {
+                            katex.render(texSource, mathElem, {
+                                throwOnError: false,
+                                displayMode: mathElem.classList.contains('math-display')
+                            });
+                        } catch (e) {
+                            console.error("KaTeX rendering error:", e);
+                            mathElem.textContent = texSource; // Fallback to showing the TeX source
+                        }
+                    });
+                }
+            };
+
+            // Emoji (using a simple text replacement, as marked-emoji might be tricky without a module system)
+            // This is a very basic emoji replacement. For a full solution, marked-emoji is better.
+            const emojiMap = {
+                ':smile:': '😄', ':laughing:': '😆', ':blush:': '😊', ':smiley:': '😃',
+                ':relaxed:': '☺️', ':smirk:': '😏', ':heart_eyes:': '😍', ':kissing_heart:': '😘',
+                ':kissing_closed_eyes:': '😚', ':flushed:': '😳', ':relieved:': '😌', ':satisfied:': '😆',
+                ':grin:': '😁', ':wink:': '😉', ':stuck_out_tongue_winking_eye:': '😜', ':stuck_out_tongue_closed_eyes:': '😝',
+                ':grinning:': '😀', ':kissing:': '😗', ':kissing_smiling_eyes:': '😙', ':stuck_out_tongue:': '😛',
+                ':sleeping:': '😴', ':worried:': '😟', ':frowning:': '😦', ':anguished:': '😧',
+                ':open_mouth:': '😮', ':grimacing:': '😬', ':confused:': '😕', ':hushed:': '😯',
+                ':expressionless:': '😑', ':unamused:': '😒', ':sweat_smile:': '😅', ':sweat:': '😓',
+                ':disappointed_relieved:': '😥', ':weary:': '😩', ':pensive:': '😔', ':disappointed:': '😞',
+                ':confounded:': '😖', ':fearful:': '😨', ':cold_sweat:': '😰', ':persevere:': '😣',
+                ':cry:': '😢', ':sob:': '😭', ':joy:': '😂', ':astonished:': '😲',
+                ':scream:': '😱', ':tired_face:': '😫', ':angry:': '😠', ':rage:': '😡',
+                ':triumph:': '😤', ':sleepy:': '😪', ':yum:': '😋', ':mask:': '😷',
+                ':sunglasses:': '😎', ':dizzy_face:': '😵', ':imp:': '👿', ':smiling_imp:': '😈',
+                ':neutral_face:': '😐', ':no_mouth:': '😶', ':innocent:': '😇', ':alien:': '👽',
+                ':yellow_heart:': '💛', ':blue_heart:': '💙', ':purple_heart:': '💜', ':heart:': '❤️',
+                ':green_heart:': '💚', ':broken_heart:': '💔', ':heartbeat:': '💓', ':heartpulse:': '💗',
+                ':two_hearts:': '💕', ':revolving_hearts:': '💞', ':cupid:': '💘', ':sparkling_heart:': '💖',
+                ':sparkles:': '✨', ':star:': '⭐', ':star2:': '🌟', ':dizzy:': '💫',
+                ':boom:': '💥', ':collision:': '💥', ':anger:': '💢', ':exclamation:': '❗',
+                ':question:': '❓', ':grey_exclamation:': '❕', ':grey_question:': '❔', ':zzz:': '💤',
+                ':dash:': '💨', ':sweat_drops:': '💦', ':notes:': '🎶', ':musical_note:': '🎵',
+                ':fire:': '🔥', ':hankey:': '💩', ':poop:': '💩', ':shit:': '💩',
+                ':+1:': '👍', ':-1:': '👎', ':thumbsup:': '👍', ':thumbsdown:': '👎',
+                ':ok_hand:': '👌', ':punch:': '👊', ':facepunch:': '👊', ':fist:': '✊',
+                ':v:': '✌️', ':wave:': '👋', ':hand:': '✋', ':raised_hand:': '✋',
+                ':open_hands:': '👐', ':point_up:': '☝️', ':point_down:': '👇', ':point_right:': '👉',
+                ':point_left:': '👈', ':raised_hands:': '🙌', ':pray:': '🙏', ':point_up_2:': '👆',
+                ':clap:': '👏', ':muscle:': '💪', ':walking:': '🚶', ':runner:': '🏃',
+                ':running:': '🏃', ':couple:': '👫', ':family:': '👪', ':two_men_holding_hands:': '👬',
+                ':two_women_holding_hands:': '👭', ':dancer:': '💃', ':dancers:': '👯', ':ok_woman:': '🙆',
+                ':no_good:': '🙅', ':information_desk_person:': '💁', ':raising_hand:': '🙋', ':bride_with_veil:': '👰',
+                ':person_with_pouting_face:': '🙎', ':person_frowning:': '🙍', ':bow:': '🙇', ':couplekiss:': '💏',
+                ':couple_with_heart:': '💑', ':massage:': '💆', ':haircut:': '💇', ':nail_care:': '💅',
+                ':boy:': '👦', ':girl:': '👧', ':woman:': '👩', ':man:': '👨',
+                ':baby:': '👶', ':older_woman:': '👵', ':older_man:': '👴', ':person_with_blond_hair:': '👱',
+                ':man_with_gua_pi_mao:': '👲', ':man_with_turban:': '👳', ':construction_worker:': '👷', ':cop:': '👮',
+                ':angel:': '👼', ':princess:': '👸', ':smiley_cat:': '😺', ':smile_cat:': '😸',
+                ':heart_eyes_cat:': '😻', ':kissing_cat:': '😽', ':smirk_cat:': '😼', ':scream_cat:': '🙀',
+                ':crying_cat_face:': '😿', ':joy_cat:': '😹', ':pouting_cat:': '😾', ':japanese_ogre:': '👹',
+                ':japanese_goblin:': '👺', ':see_no_evil:': '🙈', ':hear_no_evil:': '🙉', ':speak_no_evil:': '🙊',
+                ':guardsman:': '💂', ':skull:': '💀', ':feet:': '🐾', ':lips:': '👄',
+                ':kiss:': '💋', ':droplet:': '💧', ':ear:': '👂', ':eyes:': '👀',
+                ':nose:': '👃', ':tongue:': '👅', ':love_letter:': '💌', ':bust_in_silhouette:': '👤',
+                ':busts_in_silhouette:': '👥', ':speech_balloon:': '💬', ':thought_balloon:': '💭', ':sunny:': '☀️',
+                ':umbrella:': '☔', ':cloud:': '☁️', ':snowflake:': '❄️', ':snowman:': '⛄',
+                ':zap:': '⚡', ':cyclone:': '🌀', ':foggy:': '🌁', ':ocean:': '🌊',
+                ':cat:': '🐱', ':dog:': '🐶', ':mouse:': '🐭', ':hamster:': '🐹',
+                ':rabbit:': '🐰', ':wolf:': '🐺', ':frog:': '🐸', ':tiger:': '🐯',
+                ':koala:': '🐨', ':bear:': '🐻', ':pig:': '🐷', ':pig_nose:': '🐽',
+                ':cow:': '🐮', ':boar:': '🐗', ':monkey_face:': '🐵', ':monkey:': '🐒',
+                ':horse:': '🐴', ':racehorse:': '🐎', ':camel:': '🐫', ':sheep:': '🐑',
+                ':elephant:': '🐘', ':panda_face:': '🐼', ':snake:': '🐍', ':bird:': '🐦',
+                ':baby_chick:': '🐤', ':hatched_chick:': '🐥', ':hatching_chick:': '🐣', ':chicken:': '🐔',
+                ':penguin:': '🐧', ':turtle:': '🐢', ':bug:': '🐛', ':honeybee:': '🐝',
+                ':ant:': '🐜', ':beetle:': '🐞', ':snail:': '🐌', ':octopus:': '🐙',
+                ':tropical_fish:': '🐠', ':fish:': '🐟', ':whale:': '🐳', ':whale2:': '🐋',
+                ':dolphin:': '🐬', ':cow2:': '🐄', ':ram:': '🐏', ':rat:': '🐀',
+                ':water_buffalo:': '🐃', ':tiger2:': '🐅', ':rabbit2:': '🐇', ':chipmunk:': '🐿️',
+                ':goat:': '🐐', ':rooster:': '🐓', ':dove:': '🕊️', ':dog2:': '🐕',
+                ':poodle:': '🐩', ':cat2:': '🐈', ':dragon_face:': '🐲', ':dragon:': '🐉',
+                ':cactus:': '🌵', ':christmas_tree:': '🎄', ':evergreen_tree:': '🌲', ':deciduous_tree:': '🌳',
+                ':palm_tree:': '🌴', ':seedling:': '🌱', ':herb:': '🌿', ':shamrock:': '☘️',
+                ':four_leaf_clover:': '🍀', ':bamboo:': '🎍', ':tanabata_tree:': '🎋', ':leaves:': '🍃',
+                ':fallen_leaf:': '🍂', ':maple_leaf:': '🍁', ':mushroom:': '🍄', ':ear_of_rice:': '🌾',
+                ':bouquet:': '💐', ':tulip:': '🌷', ':rose:': '🌹', ':hibiscus:': '🌺',
+                ':sunflower:': '🌻', ':blossom:': '🌼', ':cherry_blossom:': '🌸', ':earth_americas:': '🌎',
+                ':earth_africa:': '🌍', ':earth_asia:': '🌏', ':full_moon:': '🌕', ':waning_gibbous_moon:': '🌖',
+                ':last_quarter_moon:': '🌗', ':waning_crescent_moon:': '🌘', ':new_moon:': '🌑', ':waxing_crescent_moon:': '🌒',
+                ':first_quarter_moon:': '🌓', ':waxing_gibbous_moon:': '🌔', ':new_moon_with_face:': '🌚', ':full_moon_with_face:': '🌝',
+                ':first_quarter_moon_with_face:': '🌛', ':last_quarter_moon_with_face:': '🌜', ':sun_with_face:': '🌞', ':crescent_moon:': '🌙',
+                // Add more emojis as needed
+            };
+
+            function replaceEmojiCodes(text) {
+                return text.replace(/:([a-zA-Z0-9_+-]+):/g, (match, emojiName) => {
+                    return emojiMap[match] || match; // If emoji code not in map, return original code
+                });
+            }
+
+            // KaTeX custom delimiters for marked.js
+            // Option 1: Use a marked extension (more robust)
+            // This requires more setup and potentially a custom lexer/renderer extension for marked.
+            // Option 2: Post-process HTML from marked (simpler for now)
+            // We will use this approach. The renderMathInElement function will handle this.
+        } else {
+            console.error("marked.js not loaded!");
+        }
+    </script>
+    <div class="container">
+        <%- include('partials/sidebar') %>
+            <div class="content">
+                <main>
+                    <div class="thread listing">
+                        <div class="vote">
+                            <button class="upvote" data-vote-item-id="<%= thread.id %>" data-vote-item-type="thread"
+                                data-vote-type="upvote">
+                                <svg viewBox="0 0 20 20" width="18" height="18">
+                                    <polygon points="10,2 2,18 18,18"></polygon>
+                                </svg>
+                            </button>
+                            <div class="score" id="thread-votes-<%= thread.id %>">
+                                <%= thread.vote_count || 0 %>
+                            </div>
+                            <button class="downvote" data-vote-item-id="<%= thread.id %>" data-vote-item-type="thread"
+                                data-vote-type="downvote">
+                                <svg viewBox="0 0 20 20" width="18" height="18" style="transform:rotate(180deg)">
+                                    <polygon points="10,2 2,18 18,18"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="thread-content">
+                            <h2 class="thread-title">
+                                <%= thread.title %>
+                            </h2>
+                            <div class="thread-meta">
+                                submitted <%= new Date(thread.created_at).toLocaleString() %> by
+                                    <a href="/profile?user=<%= thread.username %>" class="user">u/<%= thread.username %>
+                                    </a>
+                                    <% if (thread.category) { %>
+                                        | <span class="tag is-info" style="margin-left:0.5em;">
+                                            <%= thread.category %>
+                                        </span>
+                                        <% } %>
+                                            <% if (user && user.id===thread.user_id) { %>
+                                                | <a href="#" class="edit-thread-link">Edit</a>
+                                                | <form action="/thread/<%= thread.id %>/delete" method="POST"
+                                                    style="display:inline;" class="delete-thread-form">
+                                                    <button type="submit">Delete</button>
+                                                </form>
+                                                <form class="edit-thread-form" id="edit-thread-form"
+                                                    style="display:none; margin-top:1em;" method="POST"
+                                                    action="/thread/<%= thread.id %>/edit">
+                                                    <input type="text" name="title" value="<%= thread.title %>" required
+                                                        style="width:100%;margin-bottom:1em;">
+                                                    <textarea name="body" required
+                                                        style="width:100%;height:120px;"><%= thread.body %></textarea>
+                                                    <button type="submit">Save</button>
+                                                    <button type="button" class="cancel-edit-thread">Cancel</button>
+                                                </form>
+                                                <% } %>
+                            </div>
+                            <textarea id="raw-thread-body"
+                                style="display:none;"><%- thread.body.replace(/<\/textarea>/g, '&lt;/textarea&gt;') %></textarea>
+                            <div class="thread-body markdown-body"
+                                style="background:#f9f9fa; border-radius:8px; border:1px solid #e0e0e0; padding:1.2em 1.5em; margin-top:1.2em; font-size:1.13em;">
+                            </div>
+                            <noscript>
+                                <div
+                                    style="white-space:pre-wrap; margin-top:1em; color:#222; background:#f9f9fa; border-radius:8px; border:1px solid #e0e0e0; padding:1.2em 1.5em; font-size:1.13em;">
+                                    <%= thread.body %>
+                                </div>
+                            </noscript>
+                        </div>
+                        <!-- Markdown, KaTeX, and Emoji rendering for thread body -->
+                        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+                        <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/marked-emoji/lib/index.umd.js"></script>
+                        <script>
+                            // Define currentUser and currentThreadId once, early.
+                            const currentUser = JSON.parse('<%- JSON.stringify(user || null) %>');
+                            const currentThreadId = "<%= thread.id %>";
+
+                            document.addEventListener('DOMContentLoaded', function () {
+                                // Configure marked extensions once
+                                marked.use(markedKatex({ throwOnError: false }));
+                                const clientEmojiOptions = {
+                                    emojis: { // Add this emojis object
+                                        smile: "😄",
+                                        heart: "❤️"
+                                        // Ensure this matches the server-side list for consistency
+                                    },
+                                    renderer: (token) => `<span class="emoji">${token.emoji}</span>`
+                                };
+                                // Ensure markedEmoji is available (loaded from CDN)
+                                if (typeof markedEmoji === 'function') {
+                                    marked.use(markedEmoji(clientEmojiOptions));
+                                } else {
+                                    console.error("markedEmoji function not found. Ensure it's loaded correctly.");
+                                    // Fallback or default behavior if markedEmoji is not loaded
+                                    // For example, you might have a version of marked.use(markedEmoji()) if you want basic emoji support without custom rendering.
+                                }
+
+                                // htmlDecode function is no longer needed and has been removed.
+
+                                // Render thread body as Markdown
+                                var targetDiv = document.querySelector('.thread-body.markdown-body');
+                                var rawBodyTextarea = document.getElementById('raw-thread-body'); // Added
+
+                                if (targetDiv && rawBodyTextarea) { // Check both
+                                    try {
+                                        var rawBody = rawBodyTextarea.value; // Read from textarea
+                                        // Extensions are already configured
+                                        targetDiv.innerHTML = marked.parse(rawBody); // Parse from textarea value
+                                    } catch (e) {
+                                        console.error('Markdown rendering failed for thread body:', e);
+                                        targetDiv.textContent = rawBody;
+                                        targetDiv.style.whiteSpace = 'pre-wrap';
+
+                                        var errorNotice = document.createElement('p');
+                                        errorNotice.textContent = '[An error occurred while displaying this content. Raw text is shown.]';
+                                        errorNotice.style.color = 'red';
+                                        errorNotice.style.fontSize = '0.9em';
+                                        errorNotice.style.marginTop = '0.5em';
+                                        if (targetDiv.parentNode) {
+                                            targetDiv.parentNode.insertBefore(errorNotice, targetDiv);
+                                        } else {
+                                            document.body.appendChild(errorNotice);
+                                        }
+                                    }
+                                } else {
+                                    console.error('Target div with class ".thread-body.markdown-body" not found.');
+                                }
+
+                                // AJAX delete thread
+                                var deleteForm = document.querySelector('.delete-thread-form');
+                                if (deleteForm) {
+                                    deleteForm.addEventListener('submit', async function (e) {
+                                        e.preventDefault();
+                                        if (!confirm('Delete this thread?')) return;
+                                        const response = await fetch('/thread/<%= thread.id %>/delete', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' }
+                                        });
+                                        if (response.ok) {
+                                            window.location.href = '/';
+                                        } else {
+                                            alert('Failed to delete thread.');
+                                        }
+                                    });
+                                }
+                                // AJAX edit thread
+                                var editForm = document.getElementById('edit-thread-form');
+                                if (editForm) {
+                                    editForm.addEventListener('submit', async function (e) {
+                                        e.preventDefault();
+                                        const title = editForm.querySelector('input[name="title"]').value.trim();
+                                        const newBodyFromInput = editForm.querySelector('textarea[name="body"]').value.trim();
+                                        const response = await fetch('/thread/<%= thread.id %>/edit', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ title, body: newBodyFromInput })
+                                        });
+                                        if (response.ok) {
+                                            document.querySelector('.thread-title').textContent = title;
+                                            document.getElementById('raw-thread-body').value = newBodyFromInput; // Update textarea
+
+                                            var bodyToParseAfterEdit = newBodyFromInput;
+                                            try {
+                                                // htmlDecode is no longer needed here
+                                                // Extensions are already configured
+                                                document.querySelector('.thread-body.markdown-body').innerHTML = marked.parse(bodyToParseAfterEdit);
+                                            } catch (renderError) {
+                                                console.error('Markdown rendering failed after edit:', renderError);
+                                                const fallbackBodyDisplay = document.querySelector('.thread-body.markdown-body');
+                                                if (fallbackBodyDisplay) {
+                                                    fallbackBodyDisplay.textContent = bodyToParseAfterEdit;
+                                                    fallbackBodyDisplay.style.whiteSpace = 'pre-wrap';
+                                                }
+                                                alert('Failed to render updated thread content, showing raw text.');
+                                            }
+
+                                            editForm.style.display = 'none';
+                                            document.querySelector('.edit-thread-link').style.display = 'inline';
+                                        } else {
+                                            alert('Failed to update thread.');
+                                        }
+                                    });
+                                }
+                                // Show/hide edit form
+                                var editLink = document.querySelector('.edit-thread-link');
+                                if (editLink && editForm) {
+                                    editLink.addEventListener('click', function (e) {
+                                        e.preventDefault();
+                                        editForm.style.display = 'block';
+                                        editLink.style.display = 'none';
+                                    });
+                                    var cancelBtn = editForm.querySelector('.cancel-edit-thread');
+                                    if (cancelBtn) {
+                                        cancelBtn.addEventListener('click', function (e) {
+                                            e.preventDefault();
+                                            editForm.style.display = 'none';
+                                            editLink.style.display = 'inline';
+                                        });
+                                    }
+                                } // Closes original 'if (editLink && editForm)'
+                            }); // Correctly close the DOMContentLoaded listener for the first script block
+                        </script>
+                    </div>
+                    <h3 style="margin:1.5em 0 0.5em 0; color:#336699;">Comments</h3>
+                    <ul class="comments-list">
+                        <% comments.forEach(function(comment) { %>
+                            <%- include('partials/comment.ejs', { comment: comment, user: user }) %>
+                                <% }); %>
+                    </ul>
+                    <% if (user) { %>
+                        <form action="/comments/<%= thread.id %>" method="POST" class="new-comment-form"
+                            style="margin-top:1.5em;">
+                            <textarea name="body" placeholder="Write a comment..." required></textarea>
+                            <button type="submit">Post Comment</button>
+                        </form>
+                        <% } else { %>
+                            <div style="margin:1em 0;">
+                                <a href="/login" class="button">Log in to comment</a>
+                            </div>
+                            <% } %>
+                </main>
+            </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-emoji/lib/index.umd.js"></script>
+    <script>
+        // currentUser and currentThreadId are already defined in the script block above the main content.
+        // No need to redefine them here.
+
+        function showReplyForm(commentId) {
+            document.querySelectorAll('.reply-form').forEach(f => f.style.display = 'none');
+            var form = document.getElementById('reply-form-' + commentId);
+            if (form) form.style.display = 'block';
+        }
+        function showEditForm(commentId) {
+            document.querySelectorAll('.edit-form').forEach(f => f.style.display = 'none');
+            var form = document.getElementById('edit-form-' + commentId);
+            if (form) form.style.display = 'block';
+        }
+        function hideEditForm(commentId) {
+            var form = document.getElementById('edit-form-' + commentId);
+            if (form) form.style.display = 'none';
+        }
+        async function vote(itemId, itemType, voteType) {
+            const response = await fetch('/votes/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId, itemType, voteType })
+            });
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    const voteSpan = document.getElementById(`${itemType}-votes-${itemId}`);
+                    if (voteSpan) voteSpan.textContent = result.newCount;
+                } else {
+                    alert('Failed to record your vote. Please try again.');
+                }
+            } else {
+                alert('Failed to record your vote. Please try again.');
+            }
+        }
+        function toggleReplyForm(commentId) {
+            var form = document.getElementById('reply-form-' + commentId);
+            if (form) {
+                form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+            }
+        }
+        function toggleEditForm(commentId) {
+            var form = document.getElementById('edit-form-' + commentId);
+            if (form) {
+                form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+            }
+        }
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>"']/g, function (m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                })[m];
+            });
+        }
+
+        // Updated renderCommentHTML to use escapeHTML for source div and edit textarea content
+        function renderCommentHTML(comment) {
+            const commentBody = comment.body || "";
+            // Use escapeHTML for safe embedding in HTML string.
+            // .textContent of sourceDiv will be raw commentBody.
+            // .value of edit-textarea will be raw commentBody.
+            const escapedCommentBody = escapeHTML(commentBody);
+
+            const isOwner = currentUser && currentUser.id === comment.user_id;
+            let editControls = '';
+            if (isOwner) {
+                editControls = `
+                | <a href="#" class="edit-link" data-comment-id="${comment.id}">Edit</a>
+                | <form action="/comments/comment/${comment.id}/delete" method="POST" style="display:inline;"
+                    class="delete-comment-form" data-comment-id="${comment.id}">
+                    <button type="submit" onclick="return false;">Delete</button>
+                </form>
+                <form class="edit-form" id="edit-form-${comment.id}" style="display:none; margin-top:0.5em;">
+                    <textarea name="body" class="edit-textarea" required>${escapedCommentBody}</textarea>
+                    <button type="submit">Save</button>
+                    <button type="button" class="cancel-edit" data-comment-id="${comment.id}">Cancel</button>
+                </form>
+                `;
+            }
+
+            const isReply = comment.parent_id;
+            const liClass = `comment ${isReply ? 'comment-reply' : 'comment-root'}`;
+            const liStyle = isReply ? 'position:relative;padding-left:1.5em;' : '';
+
+            let replyIndentDiv = '';
+            if (isReply) {
+                replyIndentDiv = `
+                <div style="position:absolute;left:0;top:0;bottom:0;width:1em;display:flex;justify-content:center;">
+                    <div style="border-left:2px solid #d3d3d3;height:100%;"></div>
+                </div>
+                `;
+            }
+
+            return `
+                <li class="${liClass}" data-comment-id="${comment.id}" ${liStyle ? `style="${liStyle}"` : ''}>
+                    ${replyIndentDiv}
+                    <div class="comment-content"
+                        style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;width:100%;">
+                        <div style="display:flex;align-items:flex-start;width:100%;">
+                            <div class="vote" style="display:inline-block;vertical-align:top;">
+                                <button class="upvote" data-vote-item-id="${comment.id}" data-vote-item-type="comment" data-vote-type="upvote">
+                                    <svg viewBox="0 0 20 20" width="16" height="16"><polygon points="10,2 2,18 18,18"></polygon></svg>
+                                </button>
+                                <div class="score" id="comment-votes-${comment.id}">${comment.vote_count || 0}</div>
+                                <button class="downvote" data-vote-item-id="${comment.id}" data-vote-item-type="comment" data-vote-type="downvote">
+                                    <svg viewBox="0 0 20 20" width="16" height="16" style="transform:rotate(180deg)"><polygon points="10,2 2,18 18,18"></polygon></svg>
+                                </button>
+                            </div>
+                            <div class="comment-body"
+                                style="display:inline-block;vertical-align:top;margin-left:0.7em;width:calc(100% - 50px);">
+                                <span class="user"><a href="/profile?user=${escapeHTML(comment.username)}" class="user">u/${escapeHTML(comment.username)}</a></span>
+                                <span class="date" style="color:#888; font-size:0.95em; margin-left:0.5em;">
+                                    ${new Date(comment.created_at).toLocaleString()}
+                                </span>
+                                
+                                <div class="comment-text-container">
+                                    <div class="comment-markdown-source" style="display:none;">${escapedCommentBody}</div>
+                                    <div class="comment-text-rendered" style="margin:0.5em 0 0.5em 0;">
+                                        <!-- Parsed comment body will be inserted here -->
+                                    </div>
+                                </div>
+
+                                <a href="#" class="reply-link" data-comment-id="${comment.id}">reply</a>
+                                ${editControls}
+
+                                <form class="reply-form" id="reply-form-${comment.id}" style="display:none; margin-top:0.5em;">
+                                    <textarea name="body" class="reply-textarea" placeholder="Reply..." required></textarea>
+                                    <button type="submit">Post Reply</button>
+                                </form>
+                            </div>
+                        </div>
+                        <ul class="comments-list" style="list-style-type:none;padding-left:0;margin-top:0.5em;display:flex;flex-direction:column;gap:0.5em;width:100%;">
+                            <!-- Nested replies will be appended here -->
+                        </ul>
+                    </div>
+                </li>
+            `;
+        }
+
+        // Helper function to escape HTML
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/[&<>"']/g, function (tag) {
+                const chars = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;' // Changed from &apos; to &#39; for wider compatibility
+                };
+                return chars[tag] || tag;
+            });
+        }
+
+        function insertReplyIntoDOM(replyData, parentCommentId) {
+            const newCommentHTML = renderCommentHTML(replyData);
+            const parentCommentElement = document.querySelector(`li.comment[data-comment-id="${parentCommentId}"]`);
+            if (parentCommentElement) {
+                let repliesList = parentCommentElement.querySelector('ul.comments-list');
+                // Ensure repliesList exists, though renderCommentHTML should always create it.
+                if (!repliesList) {
+                    repliesList = document.createElement('ul');
+                    repliesList.className = 'comments-list';
+                    repliesList.style.cssText = 'list-style-type:none;padding-left:0;margin-top:0.5em;display:flex;flex-direction:column;gap:0.5em;width:100%;';
+                    const commentContent = parentCommentElement.querySelector('.comment-content');
+                    if (commentContent) {
+                        commentContent.appendChild(repliesList);
+                    } else {
+                        parentCommentElement.appendChild(repliesList); // Fallback
+                    }
+                }
+
+                const tempContainer = document.createElement('div');
+                tempContainer.innerHTML = newCommentHTML; // Safely parse the HTML string
+                const newCommentElement = tempContainer.firstElementChild;
+
+                if (newCommentElement) {
+                    repliesList.appendChild(newCommentElement);
+                    renderMarkdownForComment(newCommentElement);
+                    attachDynamicListenersToElement(newCommentElement);
+                }
+            }
+        }
+
+        function attachDynamicListenersToElement(newElement) {
+            // Event listeners for voting
+            newElement.querySelectorAll('.vote button').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const itemId = this.dataset.voteItemId;
+                    const itemType = this.dataset.voteItemType;
+                    const voteType = this.dataset.voteType;
+                    fetch(`/vote/${itemType}/${itemId}/${voteType}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const scoreElement = document.getElementById(`${itemType}-votes-${itemId}`); // Works if ID is unique
+                                if (scoreElement) scoreElement.textContent = data.newScore;
+                            } else {
+                                console.error('Vote failed:', data.message);
+                                alert(data.message || 'Failed to cast vote.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error voting:', error);
+                            alert('An error occurred while voting.');
+                        });
+                });
+            });
+
+            // Event listener for reply link
+            const replyLink = newElement.querySelector('.reply-link');
+            if (replyLink) {
+                replyLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.dataset.commentId;
+                    const form = document.getElementById(`reply-form-${commentId}`); // Works if ID is unique
+                    if (form) {
+                        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+            }
+
+            // Event listener for edit link
+            const editLink = newElement.querySelector('.edit-link');
+            if (editLink) {
+                editLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.dataset.commentId;
+                    const form = document.getElementById(`edit-form-${commentId}`); // Works if ID is unique
+                    const commentElement = this.closest('li.comment');
+                    const renderedTextDiv = commentElement.querySelector('.comment-text-rendered');
+
+                    if (form && renderedTextDiv) {
+                        form.style.display = 'block';
+                        renderedTextDiv.style.display = 'none';
+                        // Textarea is already populated correctly by renderCommentHTML
+                    }
+                });
+            }
+
+            // Event listener for cancel edit button
+            const cancelEditButton = newElement.querySelector('.cancel-edit');
+            if (cancelEditButton) {
+                cancelEditButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.dataset.commentId;
+                    const form = document.getElementById(`edit-form-${commentId}`); // Works if ID is unique
+                    const commentElement = this.closest('li.comment');
+                    const renderedTextDiv = commentElement.querySelector('.comment-text-rendered');
+
+                    if (form && renderedTextDiv) {
+                        form.style.display = 'none';
+                        renderedTextDiv.style.display = 'block';
+                    }
+                });
+            }
+
+            // Event listener for reply form submission
+            const replyForm = newElement.querySelector('.reply-form');
+            if (replyForm) {
+                replyForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const parentCommentId = this.id.replace('reply-form-', '');
+                    const body = this.querySelector('textarea[name="body"]').value;
+                    const threadId = document.body.dataset.threadId;
+
+                    fetch(`/comments/${threadId}/comment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ body: body, parent_id: parentCommentId })
+                    })
+                        .then(response => {
+                            if (!response.ok) return response.json().then(err => { throw new Error(err.message || 'Failed to post reply'); });
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                insertReplyIntoDOM(data.comment, parentCommentId);
+                                this.querySelector('textarea[name="body"]').value = '';
+                                this.style.display = 'none';
+                            } else {
+                                alert(data.message || 'Could not post reply.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error replying:', error);
+                            alert(error.message || 'An error occurred while replying.');
+                        });
+                });
+            }
+
+            // Event listener for edit form submission
+            const editForm = newElement.querySelector('.edit-form');
+            if (editForm) {
+                editForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const commentId = this.id.replace('edit-form-', '');
+                    const body = this.querySelector('textarea[name="body"]').value;
+
+                    fetch(`/comments/comment/${commentId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ body: body })
+                    })
+                        .then(response => {
+                            if (!response.ok) return response.json().then(err => { throw new Error(err.message || 'Failed to save edit'); });
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success && data.comment) {
+                                const commentElement = document.querySelector(`li.comment[data-comment-id="${commentId}"]`);
+                                if (commentElement) {
+                                    const sourceDiv = commentElement.querySelector('.comment-markdown-source');
+                                    const renderedDiv = commentElement.querySelector('.comment-text-rendered');
+                                    if (sourceDiv) {
+                                        sourceDiv.textContent = data.comment.body; // Update source with raw markdown
+                                    }
+                                    renderMarkdownForComment(commentElement);
+                                    if (renderedDiv) renderedDiv.style.display = 'block';
+                                    this.style.display = 'none';
+                                }
+                            } else {
+                                alert(data.message || 'Could not save edit.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error editing comment:', error);
+                            alert(error.message || 'An error occurred while editing.');
+                        });
+                });
+            }
+
+            // Event listener for delete form button
+            const deleteForm = newElement.querySelector('.delete-comment-form');
+            if (deleteForm) {
+                const deleteButton = deleteForm.querySelector('button[type="submit"]');
+                if (deleteButton) {
+                    deleteButton.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (!confirm('Are you sure you want to delete this comment?')) return;
+
+                        const commentId = deleteForm.dataset.commentId;
+                        fetch(deleteForm.action, { method: 'POST' })
+                            .then(response => {
+                                if (!response.ok) return response.json().then(err => { throw new Error(err.message || 'Failed to delete comment'); });
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    const commentElement = document.querySelector(`li.comment[data-comment-id="${commentId}"]`);
+                                    if (commentElement) commentElement.remove();
+                                } else {
+                                    alert(data.message || 'Could not delete comment.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting comment:', error);
+                                alert(error.message || 'An error occurred while deleting.');
+                            });
+                    });
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () { // First DOMContentLoaded for thread actions
+            // Voting (for comments, thread voting is in the first script block)
+            document.querySelectorAll('ul.comments-list .upvote, ul.comments-list .downvote').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const itemId = this.dataset.voteItemId;
+                    const itemType = this.dataset.voteItemType; // Should be 'comment'
+                    const voteType = this.dataset.voteType;
+                    vote(itemId, itemType, voteType); // vote function is defined globally
+                });
+            });
+
+            // Reply links for existing comments
+            document.querySelectorAll('ul.comments-list .reply-link').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.dataset.commentId;
+                    toggleReplyForm(commentId); // toggleReplyForm is defined globally
+                });
+            });
+
+            // Edit links for existing comments
+            document.querySelectorAll('ul.comments-list .edit-link').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.dataset.commentId;
+                    toggleEditForm(commentId); // toggleEditForm is defined globally
+                });
+            });
+
+            // Cancel edit buttons for existing comments
+            document.querySelectorAll('ul.comments-list .cancel-edit').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const commentId = this.dataset.commentId;
+                    toggleEditForm(commentId); // Hides the form
+                });
+            });
+
+            // Delete comment forms for existing comments
+            document.querySelectorAll('ul.comments-list .delete-comment-form').forEach(form => {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    if (!confirm('Are you sure you want to delete this comment?')) return;
+                    const commentId = this.dataset.commentId;
+                    const response = await fetch(`/comments/comment/${commentId}/delete`, { method: 'POST' });
+                    if (response.ok) {
+                        const commentElement = document.querySelector(`li.comment[data-comment-id="${commentId}"]`);
+                        if (commentElement) commentElement.remove();
+                    } else {
+                        alert('Failed to delete comment.');
+                    }
+                });
+            });
+
+            // Hide all reply forms on page load (for comments loaded with EJS)
+            document.querySelectorAll('ul.comments-list .reply-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            document.querySelectorAll('ul.comments-list .edit-form').forEach(form => {
+                form.style.display = 'none';
+            });
+
+            // AJAX reply submit for forms loaded with EJS (static comments)
+            document.querySelectorAll('ul.comments-list .reply-form').forEach(form => {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const commentId = this.id.replace('reply-form-', '');
+                    const textarea = this.querySelector('textarea[name="body"]');
+                    const body = textarea.value.trim();
+                    if (!body) return;
+
+                    const threadId = "<%= thread.id %>";
+                    const res = await fetch(`/comments/${threadId}?parent_id=${commentId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ body: body })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.comment) {
+                            this.style.display = 'none';
+                            textarea.value = '';
+                            insertReplyIntoDOM(data.comment, commentId);
+                        } else {
+                            alert('Failed to post reply: ' + (data.message || 'Unknown error'));
+                        }
+                    } else {
+                        alert('Failed to post reply. Server error.');
+                    }
+                });
+            });
+
+            // AJAX edit submit for forms loaded with EJS (static comments)
+            document.querySelectorAll('ul.comments-list .edit-form').forEach(form => {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const commentId = this.id.replace('edit-form-', '');
+                    const textarea = this.querySelector('textarea[name="body"]');
+                    const body = textarea.value.trim();
+                    if (!body) return;
+
+                    const res = await fetch(`/comments/comment/${commentId}/edit`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ body: body })
+                    });
+                    if (res.ok) {
+                        const commentElement = document.querySelector(`li[data-comment-id='${commentId}']`);
+                        if (commentElement) {
+                            const sourceDiv = commentElement.querySelector('.source-comment-body');
+                            const renderedDiv = commentElement.querySelector('.comment-text-container');
+                            if (sourceDiv && renderedDiv) {
+                                sourceDiv.textContent = body; // Store raw markdown
+                                try {
+                                    renderedDiv.innerHTML = marked.parse(body);
+                                } catch (parseError) {
+                                    console.error('Error parsing Markdown for edited comment:', parseError);
+                                    renderedDiv.textContent = body; // Fallback
+                                }
+                            }
+                        }
+                        this.style.display = 'none';
+                    } else {
+                        alert('Failed to edit comment.');
+                    }
+                });
+            });
+
+            function renderMarkdownForComment(commentElement) {
+                const sourceDiv = commentElement.querySelector('.comment-markdown-source');
+                const targetDiv = commentElement.querySelector('.comment-text-rendered');
+                if (sourceDiv && targetDiv) {
+                    let rawMarkdown = sourceDiv.textContent || sourceDiv.innerText || "";
+                    // 1. Replace emoji codes
+                    rawMarkdown = replaceEmojiCodes(rawMarkdown);
+                    // 2. Parse Markdown
+                    let html = marked.parse(rawMarkdown);
+                    // 3. Set HTML and render KaTeX
+                    targetDiv.innerHTML = html;
+                    renderMathInElement(targetDiv);
+                }
+            }
+
+            function renderAllCommentsMarkdown() {
+                // Render markdown for comments loaded via EJS
+                document.querySelectorAll('ul.comments-list > li.comment').forEach(commentElement => {
+                    renderMarkdownForComment(commentElement);
+                });
+            }
+
+            function insertReplyIntoDOM(comment, parentId) {
+                let parentLi = document.querySelector(`li.comment[data-comment-id='${parentId}']`);
+                if (!parentLi) {
+                    parentLi = document.querySelector('.comments-list');
+                    if (!parentLi) {
+                        console.error("Parent LI or main comments list for reply not found: ", parentId);
+                        return;
+                    }
+                }
+
+                let repliesUl = parentLi.querySelector('ul.comments-list');
+                if (!repliesUl) {
+                    if (parentLi.tagName === 'UL') {
+                        repliesUl = parentLi;
+                    } else {
+                        repliesUl = document.createElement('ul');
+                        repliesUl.className = 'comments-list';
+                        repliesUl.style.cssText = "list-style-type:none;padding-left:0;margin-top:0.5em;";
+                        const parentCommentContent = parentLi.querySelector('.comment-content');
+                        if (parentCommentContent) {
+                            parentCommentContent.appendChild(repliesUl);
+                        } else {
+                            parentLi.appendChild(repliesUl);
+                        }
+                    }
+                }
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = renderCommentHTML(comment);
+                const newCommentLi = tempDiv.firstElementChild;
+
+                if (newCommentLi) {
+                    repliesUl.appendChild(newCommentLi);
+                    renderMarkdownForComment(newCommentLi);
+                    attachDynamicListenersToElement(newCommentLi);
+                } else {
+                    console.error("Failed to create new comment LI element from HTML string");
+                }
+            }
+
+            function attachDynamicListenersToElement(element) {
+                element.querySelectorAll('.upvote, .downvote').forEach(btn => {
+                    if (btn.dataset.listenerAttached === 'true') return;
+                    btn.dataset.listenerAttached = 'true';
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        vote(this.dataset.voteItemId, this.dataset.voteItemType, this.dataset.voteType);
+                    });
+                });
+
+                element.querySelectorAll('.reply-link').forEach(btn => {
+                    if (btn.dataset.listenerAttached === 'true') return;
+                    btn.dataset.listenerAttached = 'true';
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        toggleReplyForm(this.dataset.commentId);
+                    });
+                });
+
+                element.querySelectorAll('.edit-link').forEach(btn => {
+                    if (btn.dataset.listenerAttached === 'true') return;
+                    btn.dataset.listenerAttached = 'true';
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        toggleEditForm(this.dataset.commentId);
+                    });
+                });
+
+                element.querySelectorAll('.cancel-edit').forEach(btn => {
+                    if (btn.dataset.listenerAttached === 'true') return;
+                    btn.dataset.listenerAttached = 'true';
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        toggleEditForm(this.dataset.commentId);
+                    });
+                });
+
+                element.querySelectorAll('.delete-comment-form').forEach(form => {
+                    if (form.dataset.listenerAttached === 'true') return;
+                    form.dataset.listenerAttached = 'true';
+                    form.addEventListener('submit', async function (e) {
+                        e.preventDefault();
+                        if (!confirm('Are you sure you want to delete this comment?')) return;
+                        const commentId = this.dataset.commentId;
+                        const response = await fetch(`/comments/comment/${commentId}/delete`, { method: 'POST' });
+                        if (response.ok) {
+                            const commentElement = document.querySelector(`li.comment[data-comment-id="${commentId}"]`);
+                            if (commentElement) commentElement.remove();
+                        } else {
+                            alert('Failed to delete comment.');
+                        }
+                    });
+                });
+
+                element.querySelectorAll('.reply-form').forEach(form => {
+                    if (form.dataset.listenerAttached === 'true') return;
+                    form.dataset.listenerAttached = 'true';
+                    form.addEventListener('submit', async function (e) {
+                        e.preventDefault();
+                        const commentId = this.id.replace('reply-form-', '');
+                        const textarea = this.querySelector('textarea[name="body"]');
+                        const body = textarea.value.trim();
+                        if (!body) return;
+                        const threadId = "<%= thread.id %>";
+                        const res = await fetch(`/comments/${threadId}?parent_id=${commentId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ body: body })
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.success && data.comment) {
+                                this.style.display = 'none';
+                                textarea.value = '';
+                                insertReplyIntoDOM(data.comment, commentId);
+                            } else {
+                                alert('Failed to post reply: ' + (data.message || 'Unknown error'));
+                            }
+                        } else {
+                            alert('Failed to post reply. Server error.');
+                        }
+                    });
+                });
+
+                element.querySelectorAll('.edit-form').forEach(form => {
+                    if (form.dataset.listenerAttached === 'true') return;
+                    form.dataset.listenerAttached = 'true';
+                    form.addEventListener('submit', async function (e) {
+                        e.preventDefault();
+                        const commentId = this.id.replace('edit-form-', '');
+                        const textarea = this.querySelector('textarea[name="body"]');
+                        const body = textarea.value.trim();
+                        if (!body) return;
+                        const res = await fetch(`/comments/comment/${commentId}/edit`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ body: body })
+                        });
+                        if (res.ok) {
+                            const commentLi = document.querySelector(`li[data-comment-id='${commentId}']`);
+                            if (commentLi) {
+                                const sourceDiv = commentLi.querySelector('.source-comment-body');
+                                const renderedDiv = commentLi.querySelector('.comment-text-container');
+                                if (sourceDiv && renderedDiv) {
+                                    sourceDiv.textContent = body;
+                                    try {
+                                        renderedDiv.innerHTML = marked.parse(body);
+                                    } catch (parseError) {
+                                        console.error('Error parsing Markdown for edited comment:', parseError);
+                                        renderedDiv.textContent = body;
+                                    }
+                                }
+                            }
+                            this.style.display = 'none';
+                        } else {
+                            alert('Failed to edit comment.');
+                        }
+                    });
+                });
+            }
+
+            renderAllCommentsMarkdown(); // Initial rendering for all comments loaded with the page
+
+        }); // Ensures the second DOMContentLoaded listener is properly closed with });
+    </script>

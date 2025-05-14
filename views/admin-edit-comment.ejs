@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Comment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+</head>
+
+<body>
+    <section class="section">
+        <div class="container" style="max-width: 600px;">
+            <h1 class="title has-text-info">Edit Comment</h1>
+            <form method="POST" action="/admin/comments/<%= comment.id %>/edit" class="box"
+                style="box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div class="field">
+                    <label class="label">Body</label>
+                    <div class="control">
+                        <textarea class="textarea is-medium" name="body" rows="8" required
+                            style="resize:vertical;"><%= comment.body %></textarea>
+                    </div>
+                </div>
+                <div class="field is-grouped is-grouped-right">
+                    <div class="control">
+                        <button class="button is-primary is-medium" type="submit"><span class="icon"><i
+                                    class="fas fa-save"></i></span><span>Save</span></button>
+                    </div>
+                    <div class="control">
+                        <a class="button is-light is-medium" href="/admin/comments">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+
+</html>

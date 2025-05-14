@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/bulma.min.css">
+</head>
+
+<body>
+    <%- include('partials/admin-navbar') %>
+        <section class="section">
+            <div class="container">
+                <h1 class="title">Admin Dashboard</h1>
+                <p>Welcome, <%= user.username %>!</p>
+                <div class="box">
+                    <p><strong>Total Threads:</strong>
+                        <%= threadCount %>
+                    </p>
+                    <p><strong>Total Users:</strong>
+                        <%= userCount %>
+                    </p>
+                </div>
+                <a class="button is-danger" href="/admin/logout">Logout</a>
+            </div>
+        </section>
+</body>
+
+</html>

@@ -1,0 +1,333 @@
+<%- include('partials/header') %>
+    <style>
+        #custom-toolbar {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border: 1px solid #dbdbdb;
+            /* Keep a border for definition */
+            display: flex;
+            /* Added for better alignment of groups */
+            flex-wrap: wrap;
+            /* Allow groups to wrap on smaller screens */
+            align-items: center;
+        }
+
+        .toolbar-group {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 8px;
+            /* Spacing between groups */
+            padding-right: 8px;
+            /* Space before the border */
+            border-right: 1px solid #ccc;
+            /* Separator line */
+            margin-bottom: 5px;
+            /* Add some margin for wrapped groups */
+        }
+
+        .toolbar-group:last-child {
+            margin-right: 0;
+            padding-right: 0;
+            border-right: none;
+        }
+
+        .toolbar-group .button {
+            background-color: transparent;
+            border: 1px solid transparent;
+            /* Subtle border, becomes visible on hover/active */
+            padding: 0.4em 0.7em;
+            /* Adjusted padding for better touch/click area */
+            margin-right: 2px;
+            /* Slightly reduced space between buttons in a group */
+            transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            line-height: 1;
+            /* Ensure icon and text (if any) align well */
+        }
+
+        .toolbar-group .button:last-child {
+            margin-right: 0;
+        }
+
+        .toolbar-group .button:hover {
+            background-color: #e9e9e9;
+            /* Light grey hover */
+            border-color: #c7c7c7;
+        }
+
+        .toolbar-group .button:active,
+        .toolbar-group .button.is-active {
+            /* For toggled states if ever needed */
+            background-color: #dcdcdc;
+            /* Darker grey active */
+            border-color: #b5b5b5;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+            /* Subtle inset press effect */
+        }
+
+        .toolbar-group .button i.fas,
+        .toolbar-group .button i.far {
+            /* Style for Font Awesome icons within buttons */
+            font-family: 'Font Awesome 5 Free';
+            /* Ensure FA font is applied */
+            display: inline-block;
+            /* Ensure the element itself is rendered */
+            font-size: 0.95em;
+            /* Adjust icon size */
+            vertical-align: middle;
+            /* Better vertical alignment */
+            color: #363636;
+            /* Explicitly set a common text color for visibility */
+            min-width: 1.2em;
+            /* Give it a minimum width to ensure space for the glyph */
+            text-align: center;
+            /* Center the icon glyph within its space */
+            -webkit-font-smoothing: antialiased;
+            /* For smoother rendering */
+            -moz-osx-font-smoothing: grayscale;
+            /* For smoother rendering */
+            font-style: normal;
+            /* Override any inherited italic style */
+            font-variant: normal;
+            /* Override any inherited variant */
+            text-rendering: auto;
+            /* Browser default */
+            line-height: 1;
+            /* Ensure proper line height */
+        }
+
+        .toolbar-group .button i.fas {
+            /* Specific font-weight for solid icons */
+            font-weight: 900;
+        }
+
+        .toolbar-group .button i.far {
+            /* Specific font-weight for regular icons */
+            font-weight: 400;
+        }
+
+        .card-header-title.is-main-title {
+            font-size: 1.8em;
+            /* Adjusted font size */
+            color: #0079d3;
+            /* Kept original color */
+            padding: 0.8em 1.2em;
+            /* Adjusted padding */
+            font-weight: 600;
+            /* Bulma-like weight */
+        }
+    </style>
+    <div class="container" style="max-width: 900px; margin: 3em auto;">
+        <div class="card" style="box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+            <header class="card-header">
+                <p class="card-header-title is-main-title">
+                    <span style="margin-right:0.7em;">📝</span> Create a New Thread
+                </p>
+            </header>
+            <div class="card-content" style="padding:2.5em 2.5em 2em 2.5em;">
+                <form method="POST" action="/threads/new" id="new-thread-form">
+                    <div class="field">
+                        <label class="label" for="title" style="font-size:1.2em;">Title</label>
+                        <div class="control">
+                            <input class="input" id="title" name="title" placeholder="Thread title..." required
+                                maxlength="120" style="font-size:1.3em; padding:1em;">
+                        </div>
+                        <p class="help" id="title-count" style="text-align:right; color:#888; font-size:0.95em;">0 / 120
+                        </p>
+                    </div>
+                    <div class="field" style="margin-top:2em;">
+                        <label class="label" for="category" style="font-size:1.2em;">Category</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="category" name="category" required>
+                                    <option value="">Select a category</option>
+                                    <option value="General">General</option>
+                                    <option value="Question">Question</option>
+                                    <option value="Announcement">Announcement</option>
+                                    <option value="Help">Help</option>
+                                    <option value="Discussion">Discussion</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field" style="margin-top:2em;">
+                        <label class="label" for="body" style="font-size:1.2em;">Body</label>
+                        <div id="custom-toolbar">
+                            <span class="toolbar-group">
+                                <button type="button" class="button is-small" data-format="bold"
+                                    title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                                <button type="button" class="button is-small" data-format="italic"
+                                    title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>
+                                <button type="button" class="button is-small" data-format="strikethrough"
+                                    title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+                            </span>
+                            <span class="toolbar-group">
+                                <button type="button" class="button is-small" data-format="heading"
+                                    title="Heading (##)"><i class="fas fa-heading"></i></button>
+                                <button type="button" class="button is-small" data-format="quote"
+                                    title="Quote (> text)"><i class="fas fa-quote-left"></i></button>
+                                <button type="button" class="button is-small" data-format="code"
+                                    title="Code (`code` or ```block```)"><i class="fas fa-code"></i></button>
+                            </span>
+                            <span class="toolbar-group">
+                                <button type="button" class="button is-small" data-format="ul"
+                                    title="Unordered List (- item)"><i class="fas fa-list-ul"></i></button>
+                                <button type="button" class="button is-small" data-format="ol"
+                                    title="Ordered List (1. item)"><i class="fas fa-list-ol"></i></button>
+                            </span>
+                            <span class="toolbar-group">
+                                <button type="button" class="button is-small" data-format="link" title="Link"><i
+                                        class="fas fa-link"></i></button>
+                                <button type="button" class="button is-small" data-format="hr"
+                                    title="Horizontal Rule (---)"><i class="fas fa-minus"></i></button>
+                                <button type="button" class="button is-small" data-format="emoji"
+                                    title="Insert Emoji"><i class="far fa-smile"></i></button>
+                            </span>
+                        </div>
+                        <div class="control">
+                            <textarea class="textarea" id="body" name="body" placeholder="Share your thoughts..."
+                                required rows="12" maxlength="2000"
+                                style="resize:vertical; font-size:1.15em; padding:1.2em; display:block;"></textarea>
+                        </div>
+                        <p class="help" id="body-count" style="text-align:right; color:#888; font-size:0.95em;">0 / 2000
+                        </p>
+                        <p class="help" style="color:#888; font-size:0.95em;">Supports <b>Markdown</b>,
+                            <b>code blocks</b>, <b>math</b> (<a href='https://katex.org/docs/supported.html'
+                                target='_blank'>KaTeX</a>), <b>emojis</b> (e.g. :smile:), <b>bold</b>, <b>italic</b>,
+                            <b>color</b> (HTML), and more!
+                        </p>
+                    </div>
+                    <div class="field is-grouped is-grouped-right" style="margin-top:2.5em;">
+                        <button class="button is-primary is-medium" type="submit"
+                            style="min-width:180px; font-size:1.2em; padding:0.8em 2.2em;">
+                            <span class="icon"><i class="fas fa-paper-plane"></i></span>
+                            <span>Post Thread</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- EasyMDE Markdown Editor & marked-emoji script REMOVED -->
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Live character count for title
+            const titleInput = document.getElementById('title');
+            const titleCount = document.getElementById('title-count');
+            titleInput.addEventListener('input', function () {
+                titleCount.textContent = `${this.value.length} / 120`;
+            });
+
+            // Live character count for body
+            const bodyTextarea = document.getElementById('body');
+            const bodyCount = document.getElementById('body-count');
+            bodyTextarea.addEventListener('input', function () {
+                bodyCount.textContent = `${this.value.length} / 2000`;
+            });
+
+            const toolbar = document.getElementById('custom-toolbar');
+            toolbar.addEventListener('click', function (event) {
+                const button = event.target.closest('button[data-format]');
+                if (!button) return;
+                applyFormat(button.dataset.format);
+            });
+
+            function applyFormat(format) {
+                const start = bodyTextarea.selectionStart;
+                const end = bodyTextarea.selectionEnd;
+                const selectedText = bodyTextarea.value.substring(start, end);
+                let prefix = '';
+                let suffix = '';
+                let placeholder = '';
+
+                switch (format) {
+                    case 'bold':
+                        prefix = '**'; suffix = '**'; placeholder = 'bold text';
+                        break;
+                    case 'italic':
+                        prefix = '*'; suffix = '*'; placeholder = 'italic text';
+                        break;
+                    case 'strikethrough':
+                        prefix = '~~'; suffix = '~~'; placeholder = 'strikethrough text';
+                        break;
+                    case 'heading':
+                        prefix = '## '; placeholder = 'Heading';
+                        break;
+                    case 'link':
+                        const url = prompt('Enter URL:', 'http://');
+                        if (!url) return;
+                        prefix = '['; suffix = `](${url})`; placeholder = selectedText || 'link text';
+                        break;
+                    case 'quote':
+                        if (selectedText.includes('\n')) {
+                            const lines = selectedText.split('\n');
+                            const quotedLines = lines.map(line => '> ' + line).join('\n');
+                            bodyTextarea.setRangeText(quotedLines, start, end, 'select');
+                            bodyTextarea.focus(); return;
+                        }
+                        prefix = (start > 0 && bodyTextarea.value[start - 1] !== '\n' ? '\n> ' : '> ');
+                        placeholder = 'quoted text';
+                        break;
+                    case 'code':
+                        if (selectedText.includes('\n')) {
+                            prefix = '\n```\n'; suffix = '\n```'; placeholder = selectedText || 'code block';
+                        } else {
+                            prefix = '`'; suffix = '`'; placeholder = selectedText || 'code';
+                        }
+                        break;
+                    case 'ul':
+                        if (selectedText.includes('\n')) {
+                            const lines = selectedText.split('\n');
+                            const listItems = lines.map(line => '- ' + line).join('\n');
+                            bodyTextarea.setRangeText(listItems, start, end, 'select');
+                            bodyTextarea.focus(); return;
+                        }
+                        prefix = (start > 0 && bodyTextarea.value[start - 1] !== '\n' ? '\n- ' : '- ');
+                        placeholder = 'list item';
+                        break;
+                    case 'ol':
+                        if (selectedText.includes('\n')) {
+                            const lines = selectedText.split('\n');
+                            const listItems = lines.map((line, index) => `${index + 1}. ${line}`).join('\n');
+                            bodyTextarea.setRangeText(listItems, start, end, 'select');
+                            bodyTextarea.focus(); return;
+                        }
+                        prefix = (start > 0 && bodyTextarea.value[start - 1] !== '\n' ? '\n1. ' : '1. ');
+                        placeholder = 'list item';
+                        break;
+                    case 'hr':
+                        const hrContent = (start > 0 && bodyTextarea.value[start - 1] !== '\n' ? '\n' : '') + '---' + '\n';
+                        bodyTextarea.setRangeText(hrContent, start, end, 'end');
+                        bodyTextarea.selectionStart = bodyTextarea.selectionEnd = start + hrContent.length;
+                        bodyTextarea.focus(); return;
+                    case 'emoji':
+                        bodyTextarea.setRangeText(':smile:', start, end, 'end'); // Insert one emoji, user can add more
+                        bodyTextarea.focus(); return;
+                }
+
+                const textToInsert = selectedText ? (prefix + selectedText + suffix) : (prefix + placeholder + suffix);
+                bodyTextarea.setRangeText(textToInsert, start, end, 'select');
+
+                if (!selectedText) {
+                    bodyTextarea.selectionStart = start + prefix.length;
+                    bodyTextarea.selectionEnd = start + prefix.length + placeholder.length;
+                }
+                bodyTextarea.focus();
+            }
+
+            bodyTextarea.addEventListener('keydown', function (event) {
+                if (event.ctrlKey || event.metaKey) {
+                    let handled = false;
+                    if (event.key === 'b' || event.key === 'B') { applyFormat('bold'); handled = true; }
+                    if (event.key === 'i' || event.key === 'I') { applyFormat('italic'); handled = true; }
+                    if (handled) event.preventDefault();
+                }
+            });
+        });
+    </script>

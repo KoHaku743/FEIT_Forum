@@ -1,0 +1,46 @@
+<aside class="sidebar">
+    <% if (user) { %>
+        <img src="/avatars/<%= user.avatar ? user.avatar : 'default-avatar.png' %>"
+            style="width:48px;height:48px;border-radius:50%;border:1px solid #ccc;margin-bottom:0.5em;background:#fff;">
+        <a class="button is-primary" href="/threads/new">+ Create Thread</a>
+        <ul>
+            <li><a href="/profile">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+        <% } else { %>
+            <button class="button is-primary" onclick="window.location='/signup'">Sign Up</button>
+            <h3 class="section-title">Welcome to FEIT Forum!</h3>
+            <ul>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/signup">Sign Up</a></li>
+            </ul>
+            <% } %>
+                <hr>
+                <h3 class="section-title">Top Contributors</h3>
+                <div class="top-contributors" id="top-contributors-list">
+                    <span>Loading...</span>
+                </div>
+                <hr>
+                <p style="font-size:0.9em;color:#888;">A single community for everyone.<br>Made with ❤️ for Uniza.<br><a
+                        href="https://old.reddit.com" style="color:#0079d3;">Inspired by old Reddit</a></p>
+                <script>
+                    async function loadTopContributors() {
+                        const res = await fetch('/top-contributors');
+                        if (!res.ok) return;
+                        const users = await res.json();
+                        const container = document.getElementById('top-contributors-list');
+                        if (!users.length) {
+                            container.innerHTML = '<span>No contributors yet.</span>';
+                            return;
+                        }
+                        container.innerHTML = users.map(u => `
+                <div style="display:flex;align-items:center;margin-bottom:0.5em;">
+                    <img src="/avatars/${u.avatar ? u.avatar : 'default-avatar.png'}" style="width:28px;height:28px;border-radius:50%;border:1px solid #ccc;margin-right:0.5em;background:#fff;">
+                    <span style="color:#0079d3;font-weight:bold;">u/${u.username}</span>
+                    <span class="badge karma" style="margin-left:0.5em;">${u.karma} karma</span>
+                </div>
+            `).join('');
+                    }
+                    loadTopContributors();
+                </script>
+</aside>

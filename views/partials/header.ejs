@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html> <!-- Added html tag -->
+
+<head>
+    <meta charset="UTF-8">
+    <title>FEIT Forum</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<header>
+    <nav class="navbar custom-navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item logo" href="/">
+                <span class="navbar-logo-icon">🦁</span> FEIT Forum
+            </a>
+            <button class="navbar-burger" aria-label="menu" aria-expanded="false" id="navbarBurger">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <div id="navbarMenu" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/">Home</a>
+                <a class="navbar-item" href="/threads/new">New Thread</a>
+            </div>
+            <div class="navbar-center">
+                <form action="/" method="GET" class="navbar-search">
+                    <input type="text" name="search" placeholder="Search threads..."
+                        value="<%= typeof search !== 'undefined' ? search : '' %>" />
+                    <button type="submit" class="search-btn">
+                        <svg width="18" height="18" viewBox="0 0 20 20">
+                            <circle cx="9" cy="9" r="7" stroke="#0079d3" stroke-width="2" fill="none" />
+                            <line x1="14" y1="14" x2="19" y2="19" stroke="#0079d3" stroke-width="2" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            <div class="navbar-end">
+                <% if (user) { %>
+                    <a class="navbar-item" href="/profile">
+                        <span class="navbar-avatar"><img src="/avatars/<%= user.avatar || 'default.png' %>"
+                                alt="avatar"></span>
+                        <%= user.username %>
+                    </a>
+                    <a class="navbar-item" href="/logout">Logout</a>
+                    <% } else { %>
+                        <a class="navbar-item" href="/login">Login</a>
+                        <a class="navbar-item" href="/signup">Sign Up</a>
+                        <% } %>
+            </div>
+        </div>
+    </nav>
+    <script>
+        // Hamburger menu toggle for mobile
+        document.addEventListener('DOMContentLoaded', function () {
+            const burger = document.getElementById('navbarBurger');
+            const menu = document.getElementById('navbarMenu');
+            burger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                menu.classList.toggle('is-active');
+                burger.classList.toggle('is-active');
+            });
+            document.addEventListener('click', function (e) {
+                if (menu.classList.contains('is-active') && !menu.contains(e.target) && !burger.contains(e.target)) {
+                    menu.classList.remove('is-active');
+                    burger.classList.remove('is-active');
+                }
+            });
+        });
+    </script>
+</header>

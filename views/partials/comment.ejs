@@ -1,0 +1,84 @@
+<li class="comment <%= comment.parent_id ? 'comment-reply' : 'comment-root' %>" data-comment-id="<%= comment.id %>" <%
+    if (comment.parent_id) { %> style="position:relative;padding-left:1.5em;"<% } %>>
+        <% if (comment.parent_id) { %>
+            <div style="position:absolute;left:0;top:0;bottom:0;width:1em;display:flex;justify-content:center;">
+                <div style="border-left:2px solid #d3d3d3;height:100%;"></div>
+            </div>
+            <% } %>
+                <div class="comment-content"
+                    style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;width:100%;">
+                    <div style="display:flex;align-items:flex-start;width:100%;">
+                        <div class="vote" style="display:inline-block;vertical-align:top;">
+                            <button class="upvote" data-vote-item-id="<%= comment.id %>" data-vote-item-type="comment"
+                                data-vote-type="upvote">
+                                <svg viewBox="0 0 20 20" width="16" height="16">
+                                    <polygon points="10,2 2,18 18,18"></polygon>
+                                </svg>
+                            </button>
+                            <div class="score" id="comment-votes-<%= comment.id %>">
+                                <%= comment.vote_count || 0 %>
+                            </div>
+                            <button class="downvote" data-vote-item-id="<%= comment.id %>" data-vote-item-type="comment"
+                                data-vote-type="downvote">
+                                <svg viewBox="0 0 20 20" width="16" height="16" style="transform:rotate(180deg)">
+                                    <polygon points="10,2 2,18 18,18"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="comment-body"
+                            style="display:inline-block;vertical-align:top;margin-left:0.7em;width:calc(100% - 50px);">
+                            <span class="user"><a href="/profile?user=<%= comment.username %>" class="user">u/<%=
+                                        comment.username %></a></span>
+                            <span class="date" style="color:#888; font-size:0.95em; margin-left:0.5em;">
+                                <%= new Date(comment.created_at).toLocaleString() %>
+                            </span>
+
+                            <div class="comment-text-container">
+                                <div class="comment-markdown-source" style="display:none;"><%- comment.body ?
+                                        String(comment.body).replace(/<\/(script|textarea)>/gi, '<\\ /$1>') : '' %>
+                                </div>
+                                <div class="comment-text-rendered" style="margin:0.5em 0 0.5em 0;">
+                                    <noscript>
+                                        <%= comment.body %>
+                                    </noscript>
+                                </div>
+                            </div>
+
+                            <a href="#" class="reply-link" data-comment-id="<%= comment.id %>">reply</a>
+                            <% if (user && user.id===comment.user_id) { %>
+                                | <a href="#" class="edit-link" data-comment-id="<%= comment.id %>">Edit</a>
+                                | <form action="/comments/comment/<%= comment.id %>/delete" method="POST"
+                                    style="display:inline;" class="delete-comment-form"
+                                    data-comment-id="<%= comment.id %>">
+                                    <button type="submit" onclick="return false;">Delete</button>
+                                    <!-- Consider making delete AJAX too -->
+                                </form>
+                                <% } %>
+
+                                    <form class="reply-form" id="reply-form-<%= comment.id %>"
+                                        style="display:none; margin-top:0.5em;">
+                                        <textarea name="body" class="reply-textarea" placeholder="Reply..."
+                                            required></textarea>
+                                        <button type="submit">Post Reply</button>
+                                    </form>
+
+                                    <form class="edit-form" id="edit-form-<%= comment.id %>"
+                                        style="display:none; margin-top:0.5em;">
+                                        <textarea name="body" class="edit-textarea"
+                                            required><%= comment.body %></textarea>
+                                        <button type="submit">Save</button>
+                                        <button type="button" class="cancel-edit"
+                                            data-comment-id="<%= comment.id %>">Cancel</button>
+                                    </form>
+                        </div>
+                    </div>
+                    <% if (comment.replies && comment.replies.length> 0) { %>
+                        <ul class="comments-list"
+                            style="display:flex;flex-direction:column;gap:0.5em;margin-left:0.5em;width:100%;">
+                            <% comment.replies.forEach(function(reply) { %>
+                                <%- include('comment.ejs', { comment: reply, user: user }) %>
+                                    <% }); %>
+                        </ul>
+                        <% } %>
+                </div>
+</li>

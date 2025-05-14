@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Users</title>
+    <link rel="stylesheet" href="/css/bulma.min.css">
+</head>
+
+<body>
+    <section class="section">
+        <div class="container">
+            <%- include('partials/admin-navbar') %>
+                <h1 class="title">All Users</h1>
+                <table class="table is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Is Admin</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(u=> { %>
+                            <tr>
+                                <td>
+                                    <%= u.id %>
+                                </td>
+                                <td>
+                                    <%= u.username %>
+                                </td>
+                                <td>
+                                    <%= u.is_admin ? 'Yes' : 'No' %>
+                                </td>
+                                <td>
+                                    <%= u.created_at.toLocaleString() %>
+                                </td>
+                                <td>
+                                    <% if (!u.is_admin) { %>
+                                        <form method="POST" action="/admin/users/<%= u.id %>/promote"
+                                            style="display:inline">
+                                            <button class="button is-small is-info" type="submit">Promote to
+                                                Admin</button>
+                                        </form>
+                                        <% } %>
+                                            <form method="POST" action="/admin/users/<%= u.id %>/delete"
+                                                style="display:inline" onsubmit="return confirm('Delete user?');">
+                                                <button class="button is-small is-danger" type="submit">Delete</button>
+                                            </form>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+                <a class="button" href="/admin">Back to Dashboard</a>
+        </div>
+    </section>
+</body>
+
+</html>

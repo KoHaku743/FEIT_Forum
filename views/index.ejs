@@ -1,0 +1,115 @@
+<%- include('partials/header') %>
+    <div class="container">
+        <%- include('partials/sidebar') %>
+            <div class="content">
+                <main>
+                    <% if (user) { %>
+                        <div style="margin-bottom: 1em;">
+                            <span>Hello, <%= user.username %></span> |
+                            <a href="/logout">Logout</a> |
+                            <a href="/threads/new">Submit a new link</a>
+                        </div>
+                        <% } else { %>
+                            <div style="margin-bottom: 1em;">
+                                <a href="/login">Login</a> | <a href="/signup">Sign Up</a>
+                            </div>
+                            <% } %>
+                                <form method="GET" action="/" style="margin-bottom: 1em;">
+                                    <input type="text" name="search" placeholder="Search threads..."
+                                        value="<%= search %>">
+                                    <button type="submit">Search</button>
+                                </form>
+                                <hr>
+                                <% if (threads && threads.length> 0) { %>
+                                    <% threads.forEach(thread=> { %>
+                                        <div class="thread listing">
+                                            <div class="vote">
+                                                <button class="upvote"
+                                                    onclick="vote('<%= thread.id %>', 'thread', 'upvote')">
+                                                    <svg viewBox="0 0 20 20" width="18" height="18">
+                                                        <polygon points="10,2 2,18 18,18"></polygon>
+                                                    </svg>
+                                                </button>
+                                                <div class="score" id="thread-votes-<%= thread.id %>">
+                                                    <%= thread.vote_count || 0 %>
+                                                </div>
+                                                <button class="downvote"
+                                                    onclick="vote('<%= thread.id %>', 'thread', 'downvote')">
+                                                    <svg viewBox="0 0 20 20" width="18" height="18"
+                                                        style="transform:rotate(180deg)">
+                                                        <polygon points="10,2 2,18 18,18"></polygon>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div class="thread-content">
+                                                <a href="/thread/<%= thread.id %>" class="thread-title">
+                                                    <%= thread.title %>
+                                                </a>
+                                                <div class="thread-meta">
+                                                    submitted <%= new Date(thread.created_at).toLocaleString() %> by
+                                                        <a href="/profile?user=<%= thread.username %>" class="user">u/
+                                                            <%= thread.username %>
+                                                        </a>
+                                                </div>
+                                                <div class="thread-body">
+                                                    <%- thread.body %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }); %>
+                                            <% } else { %>
+                                                <p>No threads found.</p>
+                                                <% } %>
+                                                    <div class="pagination">
+                                                        <% if (currentPage> 1) { %>
+                                                            <a href="/?page=<%= currentPage - 1 %>"
+                                                                class="pager">prev</a>
+                                                            <% } %>
+                                                                <% for (let i=1; i <=totalPages; i++) { %>
+                                                                    <a href="/?page=<%= i %>" <%=i===currentPage
+                                                                        ? 'style="font-weight:bold;"' : '' %>><%= i %>
+                                                                    </a>
+                                                                    <% } %>
+                                                                        <% if (currentPage < totalPages) { %>
+                                                                            <a href="/?page=<%= currentPage + 1 %>"
+                                                                                class="pager">next</a>
+                                                                            <% } %>
+                                                    </div>
+                </main>
+            </div>
+    </div>
+    <script>
+        async function vote(itemId, itemType, voteType) {
+            const response = await fetch('/votes/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId, itemType, voteType })
+            });
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    const voteSpan = document.getElementById(`${itemType}-votes-${itemId}`);
+                    if (voteSpan) voteSpan.textContent = result.newCount;
+                }
+            } else {
+                alert('Failed to record your vote. Please try again.');
+            }
+        }
+
+        function showReplyForm(commentId) {
+            document.querySelectorAll('.reply-form').forEach(f => f.style.display = 'none');
+            var form = document.getElementById('reply-form-' + commentId);
+            if (form) form.style.display = 'block';
+        }
+
+        function showEditForm(commentId) {
+            document.querySelectorAll('.edit-form').forEach(f => f.style.display = 'none');
+            var form = document.getElementById('edit-form-' + commentId);
+            if (form) form.style.display = 'block';
+        }
+
+        function hideEditForm(commentId) {
+            var form = document.getElementById('edit-form-' + commentId);
+            if (form) form.style.display = 'none';
+        }
+    </script>
