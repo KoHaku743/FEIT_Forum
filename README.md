@@ -21,7 +21,7 @@ Moderná webová aplikácia fóra inšpirovaná Redditom, postavená na Node.js,
 1. **Klonujte repozitár:**
    ```sh
    git clone https://github.com/KoreanPizzaGuy/FEIT_Forum.git
-   cd reddit
+   cd FEIT_Forum
    ```
 2. **Nainštalujte závislosti:**
    ```sh
