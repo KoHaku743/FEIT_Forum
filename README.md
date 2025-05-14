@@ -1,76 +1,66 @@
-# FEIT Forum (Reddit Clone)
+# FEIT Fórum (Reddit Klon)
 
-A modern forum web application inspired by Reddit, built with Node.js, Express, EJS, and MySQL. Features Markdown/KaTeX support, emoji, user authentication, voting, threaded comments, and a full-featured admin dashboard.
+Moderná webová aplikácia fóra inšpirovaná Redditom, postavená na Node.js, Express, EJS a MySQL. Obsahuje podporu Markdown/KaTeX, emoji, autentifikáciu používateľov, hlasovanie, vláknové komentáre a plnohodnotný admin dashboard.
 
-## Features
+## Funkcie
 
-- User registration, login, and profile with avatar
-- Create, edit, and delete threads and comments
-- Markdown and KaTeX math rendering in posts/comments
-- Emoji support (e.g. `:smile:`)
-- Voting on threads and comments
-- Search threads
+- Registrácia používateľa, prihlásenie a profil s avatarom
+- Vytváranie, úprava a mazanie vlákien a komentárov
+- Zobrazovanie Markdown a KaTeX matematiky v príspevkoch/komentároch
+- Podpora emoji (napr. `:smile:`) :/ niekedy nefunguje
+- Hlasovanie za vlákna a komentáre
+- Vyhľadávanie vlákien
 - Admin dashboard:
-  - Promote users to admin
-  - Edit/delete any thread or comment
-  - Manage users
-- Responsive UI with Bulma CSS
+  - Povýšenie používateľov na adminov
+  - Úprava/mazanie akéhokoľvek vlákna alebo komentára
+  - Správa používateľov
+- Responzívne rozhranie s Bulma CSS
 
-## Setup
+## Inštalácia
 
-1. **Clone the repository:**
+1. **Klonujte repozitár:**
    ```sh
    git clone https://github.com/KoreanPizzaGuy/FEIT_Forum.git
    cd reddit
    ```
-2. **Install dependencies:**
+2. **Nainštalujte závislosti:**
    ```sh
    npm install
    ```
-3. **Configure the database:**
-   - Run the provided SQL schema to create tables (`users`, `threads`, `comments`, etc).
-4. **Start the app:**
+3. **Nastavte databázu:**
+   - Spustite priložený SQL súbor so schémou na vytvorenie tabuliek (`users`, `threads`, `comments`, atď).
+4. **Spustite aplikáciu:**
+   ```sh
+   # Pre admin dashboard (voliteľné, ak používate samostatný admin port):
+   node app.js
+   node admin-app.js
+   ```
+   Skopírujte `.env.example` na `.env` a vyplňte prihlasovacie údaje k DB a session secret.
+   Hlavná aplikácia beží na [http://localhost:3000](http://localhost:3000)
+   Admin dashboard (ak je povolený) beží na [http://localhost:4000/admin](http://localhost:4000/admin)
 
-   ````sh
-   # For admin dashboard (optional, if using separate admin port):   node app.js
-   node admin-app.jsatabase and user.
-   ```y `.env.example` to `.env` and fill in your DB credentials and session secret.
-   The main app runs at [http://localhost:3000](http://localhost:3000)rovided SQL schema to create tables (`users`, `threads`, `comments`, etc).
-   The admin dashboard (if enabled) runs at [http://localhost:4000/admin](http://localhost:4000/admin)
-   ````
+## Štruktúra priečinkov
 
-## Folder Structure
+- `routes/` – Express route handlery
+- `app.js` – Hlavná Express aplikácia
+- `models/` – Databázové modely
+- `public/` – Statické súbory (CSS, avatary, uploady)
+- `views/` – EJS šablóny (partials, admin, používateľ, vlákno, atď)
 
-- `routes/` - Express route handlers- `app.js` - Main Express app
-- `models/` - Database modelsAdmin dashboard app
-- `public/` - Static files (CSS, avatars, uploads) node app.js
-- `views/` - EJS templates (partials, admin, user, thread, etc)onal, if using separate admin port):
+## Admin funkcie
 
-## Admin Features
+- Prihlásenie ako admin na `/admin/login` (predvolené: admin/admin)
+- Povýšenie používateľov na adminov v admin dashboarde
+- Úprava/mazanie akéhokoľvek vlákna alebo komentára
+- Správa používateľov
 
-- Login as admin at `/admin/login` (default: admin/admin)//localhost:3000](http://localhost:3000)
-- Promote users to admin in the admin dashboard/localhost:4000/admin](http://localhost:4000/admin)
-- Edit/delete any thread or comment
-- Manage users
-  re
-
-## Tech Stack
-
-- Node.js, Express, EJS
-- MySQL
-- Bulma CSS, Font Awesomes
-- Marked.js (Markdown), KaTeX (math), emoji supportDatabase models
-- `public/` - Static files (CSS, avatars, uploads)
-
-## LicenseEJS templates (partials, admin, user, thread, etc)
-
-MIT
+## Použité technológie
 
 - Node.js, Express, EJS
 - MySQL
 - Bulma CSS, Font Awesome
-- Marked.js (Markdown), KaTeX (math), emoji support
+- Marked.js (Markdown), KaTeX (matematika), podpora emoji
 
-## License
+## Licencia
 
 MIT
