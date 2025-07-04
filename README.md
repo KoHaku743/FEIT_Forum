@@ -1,3 +1,4 @@
+[English](https://github.com/KoHaku743/FEIT_Forum/blob/main/README.en.md)
 # FEIT Fórum (Reddit Klon)
 
 Moderná webová aplikácia fóra inšpirovaná Redditom, postavená na Node.js, Express, EJS a MySQL. Obsahuje podporu Markdown/KaTeX, emoji, autentifikáciu používateľov, hlasovanie, vláknové komentáre a plnohodnotný admin dashboard.
